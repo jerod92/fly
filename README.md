@@ -38,6 +38,10 @@ Each checklist item carries a machine-readable key, a short label for the user, 
 
 These are prompts, not automation.  You or your agent decides what to do with them.
 
+### A thin agent integration layer
+
+`anthill.run_step(workflow, agent)` connects any `(str) -> str` callable to the workflow — Claude, Ollama, OpenAI, or any HTTP API.  It builds the full context prompt and passes it to your agent.  See the [Connecting your LLM agent](#connecting-your-llm-agent) section below.
+
 ### A training loop with built-in feedback
 
 `anthill.train.Trainer` is a supervised training loop that handles the scaffolding so the agent doesn't have to re-implement it each time:
@@ -59,12 +63,155 @@ These are prompts, not automation.  You or your agent decides what to do with th
 
 ## What it does not do
 
-- It does not call any LLM API.  Prompts are strings you paste into your interface of choice.
 - It does not automate architecture search or hyperparameter tuning.
 - It does not manage datasets or download data on your behalf.
 - It does not support TensorFlow, JAX, or any framework other than PyTorch.
 - It does not support distributed training.
 - Reinforcement learning is mentioned in the workflow and prompts but the Trainer only handles supervised learning.  RL training loops must be written by the agent.
+
+---
+
+## Connecting your LLM agent
+
+An "agent" in anthill is any callable with the signature `(prompt: str) -> str`.  Pass it to `anthill.run_step(workflow, agent)` and anthill will build the full context prompt (workflow state + step instruction) and hand it off.
+
+```python
+import anthill
+
+wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
+
+def my_agent(prompt: str) -> str:
+    ...  # call any LLM here
+
+response = anthill.run_step(wf, my_agent)
+print(response)
+
+# Review the output, then mark the step complete and move to the next:
+wf["data.task_definition"].complete()
+response = anthill.run_step(wf, my_agent)
+```
+
+You can also pass additional context (existing code, error messages, file contents) as `extra_context`:
+
+```python
+response = anthill.run_step(
+    wf, my_agent,
+    extra_context="My dataset is 5000 labelled CSV rows with columns: text, label",
+)
+```
+
+### Claude (Anthropic API)
+
+```python
+import anthropic
+import anthill
+
+client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from environment
+
+def claude_agent(prompt: str) -> str:
+    msg = client.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=8096,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return msg.content[0].text
+
+wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
+response = anthill.run_step(wf, claude_agent)
+print(response)
+```
+
+Install: `pip install anthill[claude]`
+
+See [`examples/claude_agent.py`](examples/claude_agent.py) for a full walkthrough.
+
+### Ollama (local models)
+
+```python
+import ollama
+import anthill
+
+def ollama_agent(prompt: str) -> str:
+    response = ollama.chat(
+        model="llama3.2",  # or codellama, deepseek-coder, qwen2.5-coder, …
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response["message"]["content"]
+
+wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
+response = anthill.run_step(wf, ollama_agent)
+print(response)
+```
+
+Install Ollama from [ollama.com](https://ollama.com), pull a model (`ollama pull llama3.2`), then: `pip install anthill[ollama]`
+
+See [`examples/ollama_agent.py`](examples/ollama_agent.py) for a full walkthrough.
+
+### OpenAI
+
+```python
+from openai import OpenAI
+import anthill
+
+client = OpenAI()  # reads OPENAI_API_KEY from environment
+
+def openai_agent(prompt: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
+response = anthill.run_step(wf, openai_agent)
+print(response)
+```
+
+Install: `pip install anthill[openai]`
+
+### Claude Code (agentic CLI)
+
+If you use Claude Code as your agent, export the workflow checklist as a markdown string and include it in your `CLAUDE.md` or paste it directly into the session:
+
+```python
+import anthill
+
+wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
+
+# Export the full checklist with instructions for Claude Code to read
+print(wf.to_markdown())
+```
+
+Paste the output into your `CLAUDE.md`, or pipe it directly:
+
+```bash
+python -c "
+import anthill
+wf = anthill.Workflow(task='Sentiment classifier for movie reviews')
+print(wf.to_markdown())
+" >> CLAUDE.md
+```
+
+Claude Code will then have the full workflow checklist and step-by-step instructions in its context for the entire session.
+
+### Any other provider
+
+Any function that takes a string and returns a string works:
+
+```python
+import httpx
+import anthill
+
+def my_api_agent(prompt: str) -> str:
+    response = httpx.post(
+        "http://localhost:8080/generate",
+        json={"prompt": prompt},
+    )
+    return response.json()["text"]
+
+wf = anthill.Workflow(task="My task")
+response = anthill.run_step(wf, my_api_agent)
+```
 
 ---
 
@@ -76,10 +223,13 @@ pip install anthill
 
 Requires Python 3.10+ and PyTorch 2.0+.
 
-Optional: install `transformers` and `huggingface_hub` to use pretrained backbones:
+Optional: install extras for your LLM provider of choice:
 
 ```bash
-pip install anthill[hf]
+pip install anthill[claude]   # Anthropic Claude API
+pip install anthill[ollama]   # Ollama local models
+pip install anthill[openai]   # OpenAI API
+pip install anthill[hf]       # HuggingFace transformers + pretrained backbones
 ```
 
 ---
@@ -157,9 +307,13 @@ export(model, "./clock_model", format="state_dict", norm_stats={"mean": [0.5], "
 
 ---
 
-## Example
+## Examples
 
-See [`examples/analogue_clock.py`](examples/analogue_clock.py) for a complete walkthrough of the analogue clock reading task: procedural data generation, a small CNN trained from scratch on CPU, and an inference wrapper.
+| File | What it shows |
+|------|---------------|
+| [`examples/analogue_clock.py`](examples/analogue_clock.py) | Complete end-to-end: procedural data, small CNN, Trainer, export, inference wrapper |
+| [`examples/claude_agent.py`](examples/claude_agent.py) | Drive the workflow with the Anthropic Claude API |
+| [`examples/ollama_agent.py`](examples/ollama_agent.py) | Drive the workflow with a local Ollama model |
 
 ---
 

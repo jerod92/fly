@@ -41,6 +41,15 @@ hf = [
     "transformers>=4.30",
     "huggingface_hub>=0.16",
 ]
+claude = [
+    "anthropic>=0.25",
+]
+ollama = [
+    "ollama>=0.2",
+]
+openai = [
+    "openai>=1.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/jerod92/anthill"
