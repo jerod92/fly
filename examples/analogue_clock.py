@@ -3,10 +3,10 @@ examples/analogue_clock.py
 --------------------------
 End-to-end example: train a small CNN to read the hour from an analogue clock image.
 
-This demonstrates the full anthill workflow:
+This demonstrates the full fly workflow:
   1. Procedural data generation (synthetic clock images, no external data needed)
   2. Small CNN trained from scratch
-  3. anthill.train.Trainer with pre-training sanity check
+  3. fly.train.Trainer with pre-training sanity check
   4. Model export and inference wrapper
 
 Run with:
@@ -14,7 +14,7 @@ Run with:
 
 Trains in under 3 minutes on CPU.
 
-Dependencies beyond anthill's base requirements:
+Dependencies beyond fly's base requirements:
     pip install Pillow
 """
 
@@ -27,17 +27,17 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 
-import anthill
-from anthill.train import Trainer, TrainConfig
-from anthill.train.sanity import pre_training_check
-from anthill.deploy import export, ModelWrapper
+import fly
+from fly.train import Trainer, TrainConfig
+from fly.train.sanity import pre_training_check
+from fly.deploy import export, ModelWrapper
 
 
 # ---------------------------------------------------------------------------
 # Step 1: Workflow
 # ---------------------------------------------------------------------------
 
-wf = anthill.Workflow(task="Analogue clock → hour classification (0-11)")
+wf = fly.Workflow(task="Analogue clock → hour classification (0-11)")
 wf.print_checklist()
 
 
@@ -187,7 +187,7 @@ def format_sample(x: torch.Tensor, y_pred: torch.Tensor, y_true: torch.Tensor) -
 
 if __name__ == "__main__":
     print("\n" + "=" * 60)
-    print("anthill example: Analogue Clock Hour Reader")
+    print("fly example: Analogue Clock Hour Reader")
     print("=" * 60)
 
     train_ds = ClockDataset("train", n_samples=2000, seed=42)

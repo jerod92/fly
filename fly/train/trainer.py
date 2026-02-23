@@ -1,6 +1,6 @@
 """
-anthill.train.trainer
----------------------
+fly.train.trainer
+-----------------
 The Trainer class: a structured supervised training loop with rich feedback.
 
 Features
@@ -38,8 +38,8 @@ import torch
 import torch.nn as nn
 from rich.console import Console
 
-from anthill.train.config import TrainConfig
-from anthill.train.callbacks import (
+from fly.train.config import TrainConfig
+from fly.train.callbacks import (
     Callback,
     TrainerState,
     CheckpointCallback,

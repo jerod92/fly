@@ -67,9 +67,9 @@ def export(
         console.print(f"  Normalization stats → {stats_path}")
 
     # Save metadata
-    import anthill
+    import fly
     meta = {
-        "anthill_version": anthill.__version__,
+        "fly_version": fly.__version__,
         "format": fmt.value,
         **(metadata or {}),
     }

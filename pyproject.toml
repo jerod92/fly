@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.backends.legacy:build"
 
 [project]
-name = "anthill"
+name = "fly"
 version = "0.1.0"
 description = "An agentic framework for building custom deep learning models with your own LLM"
 readme = "README.md"
@@ -55,9 +55,10 @@ openai = [
 Homepage = "https://github.com/jerod92/anthill"
 Issues = "https://github.com/jerod92/anthill/issues"
 
+
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["anthill*"]
+include = ["fly*"]
 
 [tool.ruff]
 line-length = 100

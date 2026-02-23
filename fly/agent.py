@@ -1,20 +1,20 @@
 """
 agent.py
 --------
-Helpers for running anthill workflow steps with any LLM agent.
+Helpers for running fly workflow steps with any LLM agent.
 
-An "agent" in anthill is any callable with the signature::
+An "agent" in fly is any callable with the signature::
 
     (prompt: str) -> str
 
 This means you can plug in any LLM — Anthropic Claude, local Ollama models,
-OpenAI, or any HTTP API — without anthill having an opinion about which one
+OpenAI, or any HTTP API — without fly having an opinion about which one
 you use.
 
 Example::
 
     import anthropic
-    import anthill
+    import fly
 
     client = anthropic.Anthropic()
 
@@ -26,8 +26,8 @@ Example::
         )
         return msg.content[0].text
 
-    wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
-    response = anthill.run_step(wf, my_agent)
+    wf = fly.Workflow(task="Sentiment classifier for movie reviews")
+    response = fly.run_step(wf, my_agent)
     print(response)
     # Review the output, then mark the step complete:
     # wf["data.task_definition"].complete()
@@ -54,7 +54,7 @@ def run_step(workflow, agent: AgentFn, *, extra_context: str = "") -> str:
 
     Parameters
     ----------
-    workflow : anthill.Workflow
+    workflow : fly.Workflow
         The current workflow object.
     agent : (str) -> str
         Any callable that accepts a prompt string and returns a response string.

@@ -177,7 +177,7 @@ def build_checklist() -> list[CheckItem]:
                   • Be fast enough to generate a batch in < 50 ms on CPU.
 
                 If text data is needed and a runtime generator is impractical, instead produce
-                a copy-paste-ready prompt (see anthill.prompts.data.pgd_text_prompt) that the
+                a copy-paste-ready prompt (see fly.prompts.data.pgd_text_prompt) that the
                 user can run in any LLM chat interface to generate labelled text samples in a
                 specified JSON/CSV format.
             """),
@@ -187,7 +187,7 @@ def build_checklist() -> list[CheckItem]:
             phase="data",
             label="Validate existing / scraped / generated dataset",
             agent_instruction=textwrap.dedent("""\
-                Run anthill.train.sanity.check_dataset(dataset) and address every WARNING or ERROR it raises.
+                Run fly.train.sanity.check_dataset(dataset) and address every WARNING or ERROR it raises.
 
                 Also manually verify:
                   1. Class / label balance — report counts per class.  If imbalance > 10×,
@@ -271,7 +271,7 @@ def build_checklist() -> list[CheckItem]:
                 After implementing:
                   1. Run a single forward pass with a dummy batch and print the output shape.
                   2. Count parameters: sum(p.numel() for p in model.parameters() if p.requires_grad)
-                  3. Estimate memory: anthill.train.sanity.estimate_memory(model, input_shape, batch_size)
+                  3. Estimate memory: fly.train.sanity.estimate_memory(model, input_shape, batch_size)
                   4. Confirm CPU training is feasible (< 30 min for a reasonable epoch count).
             """),
         ),
@@ -309,7 +309,7 @@ def build_checklist() -> list[CheckItem]:
             phase="train",
             label="Define training configuration (hyperparameters)",
             agent_instruction=textwrap.dedent("""\
-                Create an anthill.train.TrainConfig (dataclass) with at minimum:
+                Create a fly.train.TrainConfig (dataclass) with at minimum:
                   • epochs          — start with 20; adjust after first run
                   • batch_size      — 32 for CPU, 128-256 for GPU
                   • learning_rate   — 1e-3 with AdamW is a solid default
@@ -331,7 +331,7 @@ def build_checklist() -> list[CheckItem]:
             phase="train",
             label="Run pre-training sanity check before any full training run",
             agent_instruction=textwrap.dedent("""\
-                Run anthill.train.sanity.pre_training_check(model, train_loader, val_loader, config).
+                Run fly.train.sanity.pre_training_check(model, train_loader, val_loader, config).
 
                 This check will:
                   1. Forward + backward pass on a single batch — confirm no shape errors or NaNs.
@@ -353,7 +353,7 @@ def build_checklist() -> list[CheckItem]:
             phase="train",
             label="Run the training loop",
             agent_instruction=textwrap.dedent("""\
-                Use anthill.train.Trainer(model, train_loader, val_loader, config).fit(config.epochs).
+                Use fly.train.Trainer(model, train_loader, val_loader, config).fit(config.epochs).
 
                 The Trainer provides at every log step:
                   • step, epoch, loss (train), loss (val, at val steps)
@@ -443,7 +443,7 @@ def build_checklist() -> list[CheckItem]:
             agent_instruction=textwrap.dedent("""\
                 Choose the export format based on the deployment target:
                   • PYTHON ONLY (scripting, APIs):  torch.save state_dict + architecture code.
-                    Wrap with anthill.deploy.ModelWrapper for a clean load() / predict() interface.
+                    Wrap with fly.deploy.ModelWrapper for a clean load() / predict() interface.
                   • CROSS-LANGUAGE / PRODUCTION:  export via torch.onnx.export().
                     Verify the ONNX graph with onnxruntime.InferenceSession on a test input.
                   • EMBEDDED / MOBILE:  torch.jit.script() or torch.jit.trace().
@@ -452,10 +452,10 @@ def build_checklist() -> list[CheckItem]:
                 Always save alongside the model:
                   • Normalization statistics (mean, std, vocab, …)
                   • Model config / hyperparameters
-                  • The anthill version used
+                  • The fly version used
                   • A short description of what the model does
 
-                Use anthill.deploy.export(model, path, format='auto') for a sensible default.
+                Use fly.deploy.export(model, path, format='auto') for a sensible default.
             """),
         ),
         CheckItem(
@@ -523,7 +523,7 @@ class Workflow:
 
     Usage::
 
-        wf = anthill.Workflow(task="Analogue clock reader")
+        wf = fly.Workflow(task="Analogue clock reader")
         wf.print_checklist()
 
         # Mark items as you go
@@ -557,7 +557,7 @@ class Workflow:
 
     def print_checklist(self) -> None:
         """Print the full checklist as a Rich table."""
-        title = f"anthill workflow"
+        title = f"fly workflow"
         if self.task:
             title += f" — {self.task}"
         console.print()
@@ -622,7 +622,7 @@ class Workflow:
 
     def to_markdown(self) -> str:
         """Return the full checklist as a Markdown string (for LLM context injection)."""
-        lines = [f"# anthill workflow checklist — {self.task}\n"]
+        lines = [f"# fly workflow checklist — {self.task}\n"]
         for phase in PHASES:
             lines.append(f"\n## {PHASE_TITLES[phase]}\n")
             lines.append(f"{PHASE_DESCRIPTIONS[phase]}\n")

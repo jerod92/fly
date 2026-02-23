@@ -1,7 +1,7 @@
 """
 examples/claude_agent.py
 ------------------------
-Use the Anthropic Claude API as your LLM agent with anthill.
+Use the Anthropic Claude API as your LLM agent with fly.
 
 Install:
     pip install anthropic
@@ -15,7 +15,7 @@ Run:
 
 from __future__ import annotations
 
-import anthill
+import fly
 
 try:
     import anthropic
@@ -44,10 +44,10 @@ def claude_agent(prompt: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# 2. Set up the anthill workflow
+# 2. Set up the fly workflow
 # ---------------------------------------------------------------------------
 
-wf = anthill.Workflow(task="Sentiment classifier for short movie reviews")
+wf = fly.Workflow(task="Sentiment classifier for short movie reviews")
 wf.print_checklist()
 
 # ---------------------------------------------------------------------------
@@ -55,7 +55,7 @@ wf.print_checklist()
 # ---------------------------------------------------------------------------
 
 print("\n--- Sending step to Claude ---\n")
-response = anthill.run_step(wf, claude_agent)
+response = fly.run_step(wf, claude_agent)
 print(response)
 
 # ---------------------------------------------------------------------------
@@ -66,7 +66,7 @@ print(response)
 # wf["data.task_definition"].complete()
 
 # Pass the agent's output as context for the next step:
-# response2 = anthill.run_step(
+# response2 = fly.run_step(
 #     wf, claude_agent,
 #     extra_context=f"From the previous step:\n{response}",
 # )

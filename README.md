@@ -1,10 +1,10 @@
-# Anthill
+# fly
 
-Need a quick ML model as part of your workflow? 
+Need a quick ML model as part of your workflow?
 
 A framework for building custom PyTorch models using an LLM agent as the primary driver.
 
-anthill does not train models for you.  It provides the structure that makes it practical for an LLM agent (Claude, GPT-4, Gemini, etc.) — guided by a human engineer — to take a task description from idea to a trained, exported model with minimal boilerplate.
+fly does not train models for you.  It provides the structure that makes it practical for an LLM agent (Claude, GPT-4, Gemini, etc.) — guided by a human engineer — to take a task description from idea to a trained, exported model with minimal boilerplate.
 
 ---
 
@@ -12,7 +12,7 @@ anthill does not train models for you.  It provides the structure that makes it 
 
 ### A four-phase workflow checklist
 
-Every project follows four phases.  anthill tracks your progress through them and provides the exact instruction to give your LLM agent at each step.
+Every project follows four phases.  fly tracks your progress through them and provides the exact instruction to give your LLM agent at each step.
 
 ```
 Phase 1 · Data Procurement
@@ -25,7 +25,7 @@ Each checklist item carries a machine-readable key, a short label for the user, 
 
 ### Structured LLM prompts
 
-`anthill.prompts` contains ready-to-use prompt templates for common decisions:
+`fly.prompts` contains ready-to-use prompt templates for common decisions:
 
 - Should I use existing data, scrape it, or generate it procedurally?
 - Write a procedural data generator with structural consistency and distribution variability.
@@ -40,11 +40,11 @@ These are prompts, not automation.  You or your agent decides what to do with th
 
 ### A thin agent integration layer
 
-`anthill.run_step(workflow, agent)` connects any `(str) -> str` callable to the workflow — Claude, Ollama, OpenAI, or any HTTP API.  It builds the full context prompt and passes it to your agent.  See the [Connecting your LLM agent](#connecting-your-llm-agent) section below.
+`fly.run_step(workflow, agent)` connects any `(str) -> str` callable to the workflow — Claude, Ollama, OpenAI, or any HTTP API.  It builds the full context prompt and passes it to your agent.  See the [Connecting your LLM agent](#connecting-your-llm-agent) section below.
 
 ### A training loop with built-in feedback
 
-`anthill.train.Trainer` is a supervised training loop that handles the scaffolding so the agent doesn't have to re-implement it each time:
+`fly.train.Trainer` is a supervised training loop that handles the scaffolding so the agent doesn't have to re-implement it each time:
 
 - Pre-training sanity check: forward pass, loss plausibility, overfit-one-batch test, data loading speed, dataset validation.  Stops before a long run if something is wrong.
 - Per-step logging: loss, gradient norm, samples/sec, ETA.
@@ -57,7 +57,7 @@ These are prompts, not automation.  You or your agent decides what to do with th
 
 ### Export and inference wrapper
 
-`anthill.deploy.export` saves a trained model in state_dict, TorchScript, or ONNX format alongside normalization statistics and metadata.  `anthill.deploy.ModelWrapper` is a base class for writing a clean `load() / predict()` interface around any exported model.
+`fly.deploy.export` saves a trained model in state_dict, TorchScript, or ONNX format alongside normalization statistics and metadata.  `fly.deploy.ModelWrapper` is a base class for writing a clean `load() / predict()` interface around any exported model.
 
 ---
 
@@ -73,28 +73,28 @@ These are prompts, not automation.  You or your agent decides what to do with th
 
 ## Connecting your LLM agent
 
-An "agent" in anthill is any callable with the signature `(prompt: str) -> str`.  Pass it to `anthill.run_step(workflow, agent)` and anthill will build the full context prompt (workflow state + step instruction) and hand it off.
+An "agent" in fly is any callable with the signature `(prompt: str) -> str`.  Pass it to `fly.run_step(workflow, agent)` and fly will build the full context prompt (workflow state + step instruction) and hand it off.
 
 ```python
-import anthill
+import fly
 
-wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
+wf = fly.Workflow(task="Sentiment classifier for movie reviews")
 
 def my_agent(prompt: str) -> str:
     ...  # call any LLM here
 
-response = anthill.run_step(wf, my_agent)
+response = fly.run_step(wf, my_agent)
 print(response)
 
 # Review the output, then mark the step complete and move to the next:
 wf["data.task_definition"].complete()
-response = anthill.run_step(wf, my_agent)
+response = fly.run_step(wf, my_agent)
 ```
 
 You can also pass additional context (existing code, error messages, file contents) as `extra_context`:
 
 ```python
-response = anthill.run_step(
+response = fly.run_step(
     wf, my_agent,
     extra_context="My dataset is 5000 labelled CSV rows with columns: text, label",
 )
@@ -104,7 +104,7 @@ response = anthill.run_step(
 
 ```python
 import anthropic
-import anthill
+import fly
 
 client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from environment
 
@@ -116,12 +116,12 @@ def claude_agent(prompt: str) -> str:
     )
     return msg.content[0].text
 
-wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
-response = anthill.run_step(wf, claude_agent)
+wf = fly.Workflow(task="Sentiment classifier for movie reviews")
+response = fly.run_step(wf, claude_agent)
 print(response)
 ```
 
-Install: `pip install anthill[claude]`
+Install: `pip install fly[claude]`
 
 See [`examples/claude_agent.py`](examples/claude_agent.py) for a full walkthrough.
 
@@ -129,7 +129,7 @@ See [`examples/claude_agent.py`](examples/claude_agent.py) for a full walkthroug
 
 ```python
 import ollama
-import anthill
+import fly
 
 def ollama_agent(prompt: str) -> str:
     response = ollama.chat(
@@ -138,12 +138,12 @@ def ollama_agent(prompt: str) -> str:
     )
     return response["message"]["content"]
 
-wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
-response = anthill.run_step(wf, ollama_agent)
+wf = fly.Workflow(task="Sentiment classifier for movie reviews")
+response = fly.run_step(wf, ollama_agent)
 print(response)
 ```
 
-Install Ollama from [ollama.com](https://ollama.com), pull a model (`ollama pull llama3.2`), then: `pip install anthill[ollama]`
+Install Ollama from [ollama.com](https://ollama.com), pull a model (`ollama pull llama3.2`), then: `pip install fly[ollama]`
 
 See [`examples/ollama_agent.py`](examples/ollama_agent.py) for a full walkthrough.
 
@@ -151,7 +151,7 @@ See [`examples/ollama_agent.py`](examples/ollama_agent.py) for a full walkthroug
 
 ```python
 from openai import OpenAI
-import anthill
+import fly
 
 client = OpenAI()  # reads OPENAI_API_KEY from environment
 
@@ -162,21 +162,21 @@ def openai_agent(prompt: str) -> str:
     )
     return response.choices[0].message.content
 
-wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
-response = anthill.run_step(wf, openai_agent)
+wf = fly.Workflow(task="Sentiment classifier for movie reviews")
+response = fly.run_step(wf, openai_agent)
 print(response)
 ```
 
-Install: `pip install anthill[openai]`
+Install: `pip install fly[openai]`
 
 ### Claude Code (agentic CLI)
 
 If you use Claude Code as your agent, export the workflow checklist as a markdown string and include it in your `CLAUDE.md` or paste it directly into the session:
 
 ```python
-import anthill
+import fly
 
-wf = anthill.Workflow(task="Sentiment classifier for movie reviews")
+wf = fly.Workflow(task="Sentiment classifier for movie reviews")
 
 # Export the full checklist with instructions for Claude Code to read
 print(wf.to_markdown())
@@ -186,8 +186,8 @@ Paste the output into your `CLAUDE.md`, or pipe it directly:
 
 ```bash
 python -c "
-import anthill
-wf = anthill.Workflow(task='Sentiment classifier for movie reviews')
+import fly
+wf = fly.Workflow(task='Sentiment classifier for movie reviews')
 print(wf.to_markdown())
 " >> CLAUDE.md
 ```
@@ -200,7 +200,7 @@ Any function that takes a string and returns a string works:
 
 ```python
 import httpx
-import anthill
+import fly
 
 def my_api_agent(prompt: str) -> str:
     response = httpx.post(
@@ -209,8 +209,8 @@ def my_api_agent(prompt: str) -> str:
     )
     return response.json()["text"]
 
-wf = anthill.Workflow(task="My task")
-response = anthill.run_step(wf, my_api_agent)
+wf = fly.Workflow(task="My task")
+response = fly.run_step(wf, my_api_agent)
 ```
 
 ---
@@ -218,7 +218,7 @@ response = anthill.run_step(wf, my_api_agent)
 ## Installation
 
 ```bash
-pip install anthill
+pip install fly
 ```
 
 Requires Python 3.10+ and PyTorch 2.0+.
@@ -226,10 +226,10 @@ Requires Python 3.10+ and PyTorch 2.0+.
 Optional: install extras for your LLM provider of choice:
 
 ```bash
-pip install anthill[claude]   # Anthropic Claude API
-pip install anthill[ollama]   # Ollama local models
-pip install anthill[openai]   # OpenAI API
-pip install anthill[hf]       # HuggingFace transformers + pretrained backbones
+pip install fly[claude]   # Anthropic Claude API
+pip install fly[ollama]   # Ollama local models
+pip install fly[openai]   # OpenAI API
+pip install fly[hf]       # HuggingFace transformers + pretrained backbones
 ```
 
 ---
@@ -237,10 +237,10 @@ pip install anthill[hf]       # HuggingFace transformers + pretrained backbones
 ## Quickstart
 
 ```python
-import anthill
+import fly
 
 # Start a workflow for your task
-wf = anthill.Workflow(task="Analogue clock reader")
+wf = fly.Workflow(task="Analogue clock reader")
 wf.print_checklist()
 
 # Get the instruction for the next pending step and paste it into your LLM
@@ -252,7 +252,7 @@ wf["data.source_decision"].complete(notes="Using PGD — fully simulable")
 wf.print_checklist()
 
 # Get a prompt to generate text training data
-from anthill.prompts import data as dp
+from fly.prompts import data as dp
 print(dp.pgd_text_prompt.render(
     task="classify the sentiment of short movie reviews",
     input_description="a 1-4 sentence movie review",
@@ -262,8 +262,8 @@ print(dp.pgd_text_prompt.render(
 ))
 
 # When you have a model and data loaders:
-from anthill.train import Trainer, TrainConfig
-from anthill.train.sanity import pre_training_check
+from fly.train import Trainer, TrainConfig
+from fly.train.sanity import pre_training_check
 import torch.nn as nn
 
 config = TrainConfig(epochs=20, lr=1e-3, device="auto")
@@ -276,7 +276,7 @@ if ok:
     trainer.load_best()
 
 # Export
-from anthill.deploy import export
+from fly.deploy import export
 export(model, "./clock_model", format="state_dict", norm_stats={"mean": [0.5], "std": [0.25]})
 ```
 

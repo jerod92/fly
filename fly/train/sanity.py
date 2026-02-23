@@ -1,11 +1,11 @@
 """
-anthill.train.sanity
---------------------
+fly.train.sanity
+----------------
 Pre-training sanity checks.  Run these BEFORE any full training run.
 
 Usage::
 
-    from anthill.train.sanity import pre_training_check, check_dataset
+    from fly.train.sanity import pre_training_check, check_dataset
     pre_training_check(model, train_loader, val_loader, config)
 """
 

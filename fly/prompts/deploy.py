@@ -1,10 +1,10 @@
 """
-anthill.prompts.deploy
-----------------------
+fly.prompts.deploy
+------------------
 Prompt templates for the Deployment & Maintenance phase.
 """
 
-from anthill.prompts._base import PromptTemplate
+from fly.prompts._base import PromptTemplate
 
 # ---------------------------------------------------------------------------
 # Inference wrapper design
@@ -56,7 +56,7 @@ class Predictor:
 - Must not import training-only dependencies (e.g. torchvision.transforms for training
   augmentations) — use only what is needed for inference.
 - If the model requires normalization statistics (mean/std/vocab), load them from
-  `model_dir/normalization.json` (written by anthill.deploy.export).
+  `model_dir/normalization.json` (written by fly.deploy.export).
 - Handle at least one graceful error case (wrong input shape, empty input, etc.)
   with a clear error message rather than a stack trace.
 
