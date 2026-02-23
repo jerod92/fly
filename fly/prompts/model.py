@@ -1,10 +1,10 @@
 """
-anthill.prompts.model
----------------------
+fly.prompts.model
+-----------------
 Prompt templates for the Model Creation phase.
 """
 
-from anthill.prompts._base import PromptTemplate
+from fly.prompts._base import PromptTemplate
 
 # ---------------------------------------------------------------------------
 # Architecture design

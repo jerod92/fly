@@ -1,7 +1,7 @@
 """
 examples/ollama_agent.py
 ------------------------
-Use a locally running Ollama model as your LLM agent with anthill.
+Use a locally running Ollama model as your LLM agent with fly.
 No API key required — everything runs on your machine.
 
 Install Ollama:
@@ -22,7 +22,7 @@ Run:
 
 from __future__ import annotations
 
-import anthill
+import fly
 
 try:
     import ollama
@@ -50,10 +50,10 @@ def ollama_agent(prompt: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# 2. Set up the anthill workflow
+# 2. Set up the fly workflow
 # ---------------------------------------------------------------------------
 
-wf = anthill.Workflow(task="Sentiment classifier for short movie reviews")
+wf = fly.Workflow(task="Sentiment classifier for short movie reviews")
 wf.print_checklist()
 
 # ---------------------------------------------------------------------------
@@ -61,7 +61,7 @@ wf.print_checklist()
 # ---------------------------------------------------------------------------
 
 print(f"\n--- Sending step to {OLLAMA_MODEL} via Ollama ---\n")
-response = anthill.run_step(wf, ollama_agent)
+response = fly.run_step(wf, ollama_agent)
 print(response)
 
 # ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ print(response)
 # wf["data.task_definition"].complete()
 
 # Pass the agent's output as context for the next step:
-# response2 = anthill.run_step(
+# response2 = fly.run_step(
 #     wf, ollama_agent,
 #     extra_context=f"From the previous step:\n{response}",
 # )

@@ -94,7 +94,7 @@ class ModelWrapper:
         device: str = "cpu",
     ) -> "ModelWrapper":
         """
-        Load a model exported with ``anthill.deploy.export``.
+        Load a model exported with ``fly.deploy.export``.
 
         If ``model_cls`` is provided, loads state_dict into a new instance.
         Otherwise, attempts to load a TorchScript model.
@@ -102,7 +102,7 @@ class ModelWrapper:
         Parameters
         ----------
         model_dir : str
-            Directory produced by anthill.deploy.export.
+            Directory produced by fly.deploy.export.
         model_cls : type | None
             The nn.Module class (required for state_dict format).
         model_kwargs : dict | None

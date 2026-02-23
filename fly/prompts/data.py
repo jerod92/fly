@@ -1,10 +1,10 @@
 """
-anthill.prompts.data
---------------------
+fly.prompts.data
+----------------
 Prompt templates for the Data Procurement phase.
 """
 
-from anthill.prompts._base import PromptTemplate
+from fly.prompts._base import PromptTemplate
 
 # ---------------------------------------------------------------------------
 # PGD: ask an LLM to generate text data in a structured format

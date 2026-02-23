@@ -1,10 +1,10 @@
 """
-anthill.prompts.train
----------------------
+fly.prompts.train
+-----------------
 Prompt templates for the Training Loop phase.
 """
 
-from anthill.prompts._base import PromptTemplate
+from fly.prompts._base import PromptTemplate
 
 # ---------------------------------------------------------------------------
 # Loss & metric design
@@ -166,7 +166,7 @@ What reward does a uniformly random policy achieve on average?
 Based on the action space type and state dimensionality:
   - Discrete actions, low-dim state: DQN or PPO
   - Continuous actions: PPO or SAC
-  - Note: anthill.train.Trainer supports supervised learning by default.
+  - Note: fly.train.Trainer supports supervised learning by default.
     For RL, provide a custom training loop using the reward function above.
 """,
 )
