@@ -1,5 +1,7 @@
 # anthill
 
+Need a quick ML model as part of your workflow? 
+
 A framework for building custom PyTorch models using an LLM agent as the primary driver.
 
 anthill does not train models for you.  It provides the structure that makes it practical for an LLM agent (Claude, GPT-4, Gemini, etc.) — guided by a human engineer — to take a task description from idea to a trained, exported model with minimal boilerplate.
