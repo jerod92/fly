@@ -1,4 +1,4 @@
-# anthill
+# Anthill
 
 Need a quick ML model as part of your workflow? 
 
